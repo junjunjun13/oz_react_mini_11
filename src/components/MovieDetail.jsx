@@ -1,23 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BASE_URL, IMAGE_URL } from "../constant/constant";
+import LoadingSpinner from "../components/LoadingSpinner"; // 👈 추가
 
 export default function MovieDetail() {
   const [movie, setMovie] = useState(null);
   const { id } = useParams();
-
-  // 🌘 🌗 🌖 🌕 이모지 로딩 상태
-  const loadingPhases = ["🌘", "🌗", "🌖", "🌕"];
-  const [phaseIndex, setPhaseIndex] = useState(0);
-
-  useEffect(() => {
-    if (!movie) {
-      const interval = setInterval(() => {
-        setPhaseIndex((prev) => (prev + 1) % loadingPhases.length);
-      }, 300);
-      return () => clearInterval(interval);
-    }
-  }, [movie]);
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -37,22 +25,17 @@ export default function MovieDetail() {
     fetchMovie();
   }, [id]);
 
-  // 로딩 중일 때
+  // 로딩 중
   if (!movie) {
-    return (
-      <div className="text-center py-10 text-6xl">
-        {loadingPhases[phaseIndex]}
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
-  // movie가 있을 때 구조 분해
   const { backdrop_path, poster_path, title, vote_average, genres, overview } =
     movie;
 
   return (
     <div className="font-sans">
-      {/* 배경 이미지 영역 */}
+      {/* 배경 이미지 */}
       <div
         className="hidden md:flex h-72 items-center text-white px-8"
         style={{

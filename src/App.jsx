@@ -1,30 +1,65 @@
-import React, { useEffect, useState } from "react"; //useEffect:컴포넌트가 처음 화면에 나타날 때 실행되는 함수 정정용 훅 useState:상태 관리용 훅 영화 목록 저장
-import { Routes, Route } from "react-router-dom"; //페이지를 경로별로 연결하기 위한 react router 기능
-import Layout from "./components/Layout"; //페이지 상단에 NavBar를 포함한 공통 레이아웃
-import MovieCard from "./components/MovieCard"; //영화 목록 하나하나를 카드 형식으로 보여주는 컴포넌트
-import MovieDetail from "./components/MovieDetail"; //영화 상세 정보를 보여주는 컴포넌트
+import React, { useEffect, useState } from "react";
+import { Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
+import MovieDetail from "./components/MovieDetail";
 import SearchResult from "./pages/SearchResult";
-import { IMAGE_URL, BASE_URL } from "./constant/constant";
+import { BASE_URL } from "./constant/constant";
+import MovieSlider from "./components/MovieSlider";
 
 export default function App() {
-  const [movies, setMovies] = useState([]); //movies:영화 리스트 데이터를 저장하는 배열 setMovies:데이터를 받아와서 저장하는 함수
+  const [popular, setPopular] = useState([]);
+  const [topRated, setTopRated] = useState([]);
+  const [action, setAction] = useState([]);
+  const [romance, setRomance] = useState([]);
 
   useEffect(() => {
-    //useEffect:앱이 시작될 때 한 번 실행
     const fetchMovies = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/movie/popular?language=ko-KR`, {
-          //fetch(): TMDB API에서 영화 데이터를 요청
+        const options = {
           headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_TMDB_API_KEY}`, //Authorization: env에 저장한 API 토큰으로 인증
-            accept: "application/json", //
+            Authorization: `Bearer ${import.meta.env.VITE_TMDB_API_KEY}`,
+            accept: "application/json",
           },
-        });
-        const data = await res.json();
+        };
 
-        // 필터링: 성인영화 제외
-        const safeMovies = data.results.filter((movie) => !movie.adult); //성인 영화는 제외함 //data.results:영화 리스트 배열
-        setMovies(safeMovies); //필터링된 영화를 상태에 저장
+        const [popularRes, topRatedRes, actionRes, romanceRes] =
+          await Promise.all([
+            fetch(`${BASE_URL}/movie/popular?language=ko-KR`, options),
+            fetch(`${BASE_URL}/movie/top_rated?language=ko-KR`, options),
+            fetch(
+              `${BASE_URL}/discover/movie?with_genres=28&language=ko-KR`,
+              options
+            ), // 액션
+            fetch(
+              `${BASE_URL}/discover/movie?with_genres=10749&language=ko-KR`,
+              options
+            ), // 로맨스
+          ]);
+
+        const [popularData, topRatedData, actionData, romanceData] =
+          await Promise.all([
+            popularRes.json(),
+            topRatedRes.json(),
+            actionRes.json(),
+            romanceRes.json(),
+          ]);
+
+        // 성인 영화 제외하고 저장
+        const filterAdult = (list) =>
+          list.results.filter((movie) => !movie.adult);
+
+        setPopular(filterAdult(popularData));
+        setTopRated(filterAdult(topRatedData));
+        setAction(filterAdult(actionData));
+        setRomance(
+          romanceData.results.filter(
+            (movie) =>
+              !movie.adult && // 성인 제외
+              movie.poster_path && // 포스터 있는 것만
+              movie.vote_count > 100 && // 투표수 100개 이상
+              movie.vote_average >= 5 // 평점 5점 이상
+          )
+        );
       } catch (err) {
         console.error("영화 데이터를 불러오는 데 실패했습니다:", err);
       }
@@ -39,21 +74,11 @@ export default function App() {
         <Route
           index
           element={
-            <div className="bg-[#141414] min-h-screen text-white w-full">
-              <h1 className="text-3xl font-bold text-red-600 mb-6">
-                인기 영화
-              </h1>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {movies.map((movie) => (
-                  <MovieCard
-                    id={movie.id}
-                    key={movie.id}
-                    title={movie.title}
-                    poster={`${IMAGE_URL}/w200${movie.poster_path}`}
-                    rating={movie.vote_average}
-                  />
-                ))}
-              </div>
+            <div className="bg-[#141414] min-h-screen text-white w-full px-4 py-6 space-y-10">
+              <MovieSlider title="🔥 인기 영화" movies={popular} />
+              <MovieSlider title="🎯 평점 높은 영화" movies={topRated} />
+              <MovieSlider title=" 액션 영화" movies={action} />
+              <MovieSlider title="💖 로맨스 영화" movies={romance} />
             </div>
           }
         />

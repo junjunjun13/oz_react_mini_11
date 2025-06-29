@@ -12,14 +12,20 @@ export default function MovieCard({ id, title, poster, rating }) {
   return (
     <div
       onClick={handleClick}
-      className="cursor-pointer border border-gray-300 rounded-lg shadow-md p-4 w-48 m-2 bg-purple hover:shadow-lg transition"
+      className="cursor-pointer border border-gray-500 rounded-xl bg-gray-900 hover:shadow-lg transition p-2 h-full"
     >
-      <img src={poster} alt={title} className="w-full rounded-md mb-2" />
-      <h3 className="text-lg font-semibold truncate">{title}</h3>
+      <img
+        src={poster}
+        alt={title}
+        className="w-full h-[200px] object-cover rounded mb-2"
+      />
+      <h3 className="text-xs font-semibold text-white truncate mb-1">
+        {title}
+      </h3>
       <div className="mb-1">
         <MovieRatingGauge voteAverage={rating} />
       </div>
-      <p className="text-gray-500 text-right font-bold text-sm">
+      <p className="text-[11px] text-gray-300 text-right">
         🌟 {rating.toFixed(1)} / 10
       </p>
     </div>
