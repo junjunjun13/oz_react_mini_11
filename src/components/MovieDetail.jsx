@@ -6,6 +6,19 @@ export default function MovieDetail() {
   const [movie, setMovie] = useState(null);
   const { id } = useParams();
 
+  // 🌘 🌗 🌖 🌕 이모지 로딩 상태
+  const loadingPhases = ["🌘", "🌗", "🌖", "🌕"];
+  const [phaseIndex, setPhaseIndex] = useState(0);
+
+  useEffect(() => {
+    if (!movie) {
+      const interval = setInterval(() => {
+        setPhaseIndex((prev) => (prev + 1) % loadingPhases.length);
+      }, 300);
+      return () => clearInterval(interval);
+    }
+  }, [movie]);
+
   useEffect(() => {
     const fetchMovie = async () => {
       try {
@@ -24,9 +37,16 @@ export default function MovieDetail() {
     fetchMovie();
   }, [id]);
 
-  if (!movie)
-    return <div className="text-center py-10 text-6xl">🌘 🌗 🌖 🌕</div>;
+  // 로딩 중일 때
+  if (!movie) {
+    return (
+      <div className="text-center py-10 text-6xl">
+        {loadingPhases[phaseIndex]}
+      </div>
+    );
+  }
 
+  // movie가 있을 때 구조 분해
   const { backdrop_path, poster_path, title, vote_average, genres, overview } =
     movie;
 
