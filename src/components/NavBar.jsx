@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useDebounce from "../hooks/useDebounce";
 
 export default function NavBar() {
@@ -15,7 +15,9 @@ export default function NavBar() {
 
   return (
     <nav className="bg-gray-900 text-white px-8 py-4 flex flex-col md:flex-row md:justify-between md:items-center">
-      <h1 className="text-2xl font-bold text-purple-400">MOVIE</h1>
+      <Link to="/">
+        <h1 className="text-2xl font-bold text-purple-400">JUN MOVIE</h1>
+      </Link>
       <input
         type="text"
         placeholder="영화 제목 검색"

@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import MovieRatingGauge from "./MovieRatingGauge";
 
 export default function MovieCard({ id, title, poster, rating }) {
   const navigate = useNavigate();
@@ -15,7 +16,12 @@ export default function MovieCard({ id, title, poster, rating }) {
     >
       <img src={poster} alt={title} className="w-full rounded-md mb-2" />
       <h3 className="text-lg font-semibold truncate">{title}</h3>
-      <p className="text-sm text-gray-400">⭐: {rating}</p>
+      <div className="mb-1">
+        <MovieRatingGauge voteAverage={rating} />
+      </div>
+      <p className="text-gray-500 text-right font-bold text-sm">
+        🌟 {rating.toFixed(1)} / 10
+      </p>
     </div>
   );
 }
